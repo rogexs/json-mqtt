@@ -25,14 +25,28 @@ def index():
 def registros():
     return render_template('registros.html')
 
-
-# Ruta para obtener los datos de la tabla 'lecturas'
+# Ruta para obtener los datos de la tabla 'lecturas' con paginación
 @app.route('/lecturas', methods=['GET'])
 def get_lecturas():
     try:
-        # Obtenemos todas las lecturas en una sola consulta
-        response = supabase.table("lecturas").select("*").execute()
-        return jsonify(response.data), 200
+        all_readings = []  # Lista para almacenar todas las lecturas
+        offset = 0
+        limit = 1000  # Número máximo de registros por consulta
+
+        while True:
+            # Obtiene un lote de lecturas con paginación usando offset y limit
+            response = supabase.table("lecturas").select("*").range(offset, offset + limit - 1).execute()
+            if response.data:  # Verifica si hay datos
+                all_readings.extend(response.data)  # Añade el lote a la lista total
+
+                # Si el número de lecturas obtenidas es menor que el límite, termina la paginación
+                if len(response.data) < limit:
+                    break
+                offset += limit  # Incrementa el offset para obtener la siguiente "página"
+            else:
+                break  # Salimos del bucle si no hay más datos
+
+        return jsonify(all_readings), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
