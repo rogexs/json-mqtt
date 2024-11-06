@@ -1,0 +1,77 @@
+/* Estilos generales */
+body {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+/* Estilo del encabezado */
+header {
+    background-color: #007bff;
+    border-bottom: 4px solid #0056b3;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Botón de regreso */
+.btn-outline-primary {
+    color: #007bff;
+    border: 2px solid #007bff;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos de la tabla */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 130%; /* Aumenta el ancho de la tabla para que ocupe más espacio */
+    max-width: none; /* Elimina el límite de ancho máximo */
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table thead {
+    background-color: #333;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.table tbody td, .table thead th {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Centrar el contenido de las celdas de la tabla */
+.table th, .table td {
+    padding: 1rem; /* Mantén el espacio interno */
+    font-size: 0.75rem;
+    text-align: center; /* Centra el contenido de las celdas */
+    vertical-align: middle;
+}

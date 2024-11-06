@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Lecturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body class="bg-light">
+
+    <!-- Barra de navegación con degradado y sombra -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow w-100">
+        <div class="container-fluid px-0">
+            <a class="navbar-brand fw-bold" href="#">Monitor de Lecturas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('registros') }}">Ver Tabla de Lecturas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container mt-5">
+        <div class="d-flex justify-content-center">
+            <h1 class="text-primary display-4 fw-bold">Lector de Datos en Tiempo Real</h1>
+        </div>
+
+        <div class="card mt-4 shadow-lg border-0" style="background-color: #FFFFFF;">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h5 class="text-secondary border-bottom pb-2">General</h5>
+                        <p>Flujo: <span id="flujo">0</span></p>
+                        <p>Frecuencia: <span id="frecuencia1">0</span>/<span id="frecuencia2">0</span> s</p>
+                        <p>Lote: <span id="lote1">0</span>/<span id="lote2">0</span> hrs</p>
+                        <p>Repeticiones: <span id="repeticion1">0</span>/<span id="repeticion2">0</span></p>
+                        <p>Porcentaje: <span id="porcentaje">0</span> %</p>
+                        <p>Densidad: <span id="densidad">0</span> Kg/M³</p>
+                        <p>A. y Sed.: <span id="a_y_sed">0</span> %</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="text-secondary border-bottom pb-2">Contenedor A</h5>
+                        <p>GRABS: <span id="grabs_a">0</span></p>
+                        <p>Peso: <span id="peso_a">0</span> kg</p>
+                        <p>Volumen: <span id="volumen_a">0</span> L</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="text-secondary border-bottom pb-2">Contenedor B</h5>
+                        <p>GRABS: <span id="grabs_b">0</span></p>
+                        <p>Peso: <span id="peso_b">0</span> kg</p>
+                        <p>Volumen: <span id="volumen_b">0</span> L</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de notificación de error -->
+    <div id="error-notification"
+        style="display: none; color: red; background-color: #fdd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+        <!-- Mensajes de error aparecerán aquí -->
+    </div>
+
+
+    <script src="/static/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
