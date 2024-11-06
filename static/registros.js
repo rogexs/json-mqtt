@@ -3,7 +3,7 @@
 // Función para obtener los datos de la API y llenar la tabla
 async function fetchLecturas() {
     try {
-        const response = await fetch('http://localhost:5000/lecturas');
+        const response = await fetch('https://json-mqtt.onrender.com/lecturas');
         if (!response.ok) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
