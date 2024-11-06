@@ -74,7 +74,7 @@ def on_message(client, userdata, msg):
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.tls_set(ca_certs="/home/roge/Documents/isrgrootx1.pem")
+mqtt_client.tls_set(ca_certs="certs/isrgrootx1.pem")
 mqtt_client.username_pw_set("SuperRoot-99", "SuperRoot-99")
 mqtt_client.connect("fee7a60180ef4e41a8186ff373e7ff32.s1.eu.hivemq.cloud", 8883)
 
