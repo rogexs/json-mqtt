@@ -1,79 +1,44 @@
-// app.js
+const options = {
+    protocol: 'wss',
+    clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
+    username: 'SuperRoot-99',
+    password: 'SuperRoot-99',
+};
 
-// Función para obtener los datos más recientes de la API
-async function obtenerDatos() {
-    try {
-        const response = await fetch('https://json-mqtt.onrender.com/lecturas');
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-        const data = await response.json();
+const client = mqtt.connect('wss://fee7a60180ef4e41a8186ff373e7ff32.s1.eu.hivemq.cloud:8884/mqtt', options);
 
-        if (data.length > 0) {
-            // Muestra el último dato y actualiza directamente los valores en la página
-            const lecturasRecientes = data[data.length - 1];
-
-            const elementos = {
-                flujo: 'flujo',
-                frecuencia1: 'frecuencia1',
-                frecuencia2: 'frecuencia2',
-                lote1: 'lote1',
-                lote2: 'lote2',
-                repeticion1: 'repeticion1',
-                repeticion2: 'repeticion2',
-                porcentaje: 'porcentaje',
-                densidad: 'densidad',
-                a_y_sed: 'a_y_sed',
-                grabs_a: 'grabs_a',
-                peso_a: 'peso_a',
-                volumen_a: 'volumen_a',
-                grabs_b: 'grabs_b',
-                peso_b: 'peso_b',
-                volumen_b: 'volumen_b'
-            };
-
-            for (const [key, id] of Object.entries(elementos)) {
-                document.getElementById(id).textContent = lecturasRecientes[key] || '-';
-            }
+client.on('connect', () => {
+    console.log('Conectado al broker');
+    client.subscribe('test/topic', (err) => {
+        if (!err) {
+            console.log('Suscrito al tópico');
         } else {
-            mostrarError("No hay datos recientes disponibles.");
+            console.error('Error al suscribirse:', err);
         }
-    } catch (error) {
-        console.error("Error al obtener los datos:", error);
-        mostrarError("Error al conectar con el servidor.");
-    }
-}
+    });
+});
 
-// Función para mostrar errores en la interfaz
-function mostrarError(mensaje) {
-    const errorDiv = document.getElementById('error-notification');
-    errorDiv.textContent = mensaje;
-    errorDiv.style.display = 'block';
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000); // Desaparece en 5 segundos
-}
+client.on('message', (topic, message) => {
+    const data = JSON.parse(message.toString());
 
-// Modificación en fetchLecturas para manejar errores
-async function fetchLecturas() {
-    try {
-        const response = await fetch('http://localhost:5000/lecturas');
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-        const data = await response.json();
-        // Actualiza la tabla solo si hay datos
-        if (data.length) {
-            llenarTabla(data);
-        } else {
-            mostrarError("No se encontraron datos en la base de datos.");
-        }
-    } catch (error) {
-        console.error('Error al obtener los datos:', error);
-        mostrarError("Error al conectar con el servidor.");
-    }
-}
+    document.getElementById('flujo').textContent = data.flujo;
+    document.getElementById('frecuencia1').textContent = data.frecuencia.valor1;
+    document.getElementById('frecuencia2').textContent = data.frecuencia.valor2;
+    document.getElementById('lote1').textContent = data.lote.valor1;
+    document.getElementById('lote2').textContent = data.lote.valor2;
+    document.getElementById('repeticion1').textContent = data.repeticiones.valor1;
+    document.getElementById('repeticion2').textContent = data.repeticiones.valor2;
+    document.getElementById('porcentaje').textContent = data.porcentaje;
+    document.getElementById('densidad').textContent = data.densidad;
+    document.getElementById('a_y_sed').textContent = data.a_y_sed;
+    document.getElementById('grabs_a').textContent = data.grabs_a;
+    document.getElementById('peso_a').textContent = data.peso_a;
+    document.getElementById('volumen_a').textContent = data.volumen_a;
+    document.getElementById('grabs_b').textContent = data.grabs_b;
+    document.getElementById('peso_b').textContent = data.peso_b;
+    document.getElementById('volumen_b').textContent = data.volumen;
+});
 
-// Llama a la función cada 5 segundos para actualizar los datos en tiempo real
-setInterval(obtenerDatos, 5000); 
-document.addEventListener('DOMContentLoaded', obtenerDatos);
+client.on('error', (err) => {
+    console.error('Error de conexión:', err);
+});

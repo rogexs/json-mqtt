@@ -4,6 +4,7 @@ from supabase import create_client, Client
 import paho.mqtt.client as mqtt
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
+from threading import Timer
 
 # URL y clave API anónima de Supabase
 supabase_url = "https://qiuemjqtqiyyxumrkdga.supabase.co"
@@ -16,10 +17,13 @@ supabase: Client = create_client(supabase_url, supabase_key)
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)  # Habilita CORS para todas las rutas
 
+# Variable global para manejar el intervalo
+last_message_time = 0
+
 # Ruta para la página de inicio, renderizando el archivo index.html
 @app.route('/')
 def index():
-    return render_template('index.html')  # Servir el archivo index.html desde templates/
+    return render_template('index.html')
 
 @app.route('/registros')
 def registros():
@@ -29,22 +33,19 @@ def registros():
 @app.route('/lecturas', methods=['GET'])
 def get_lecturas():
     try:
-        all_readings = []  # Lista para almacenar todas las lecturas
+        all_readings = []
         offset = 0
-        limit = 1000  # Número máximo de registros por consulta
+        limit = 1000
 
         while True:
-            # Obtiene un lote de lecturas con paginación usando offset y limit
             response = supabase.table("lecturas").select("*").range(offset, offset + limit - 1).execute()
-            if response.data:  # Verifica si hay datos
-                all_readings.extend(response.data)  # Añade el lote a la lista total
-
-                # Si el número de lecturas obtenidas es menor que el límite, termina la paginación
+            if response.data:
+                all_readings.extend(response.data)
                 if len(response.data) < limit:
                     break
-                offset += limit  # Incrementa el offset para obtener la siguiente "página"
+                offset += limit
             else:
-                break  # Salimos del bucle si no hay más datos
+                break
 
         return jsonify(all_readings), 200
     except Exception as e:
@@ -57,32 +58,39 @@ def on_connect(client, userdata, flags, rc):
 
 # Función para manejar los mensajes recibidos
 def on_message(client, userdata, msg):
-    try:
-        data = json.loads(msg.payload.decode("utf-8"))
-        data_mapped = {
-            "flujo": data["flujo"],
-            "frecuencia1": data["frecuencia"]["valor1"],
-            "frecuencia2": data["frecuencia"]["valor2"],
-            "lote1": data["lote"]["valor1"],
-            "lote2": data["lote"]["valor2"],
-            "repeticion1": data["repeticiones"]["valor1"],
-            "repeticion2": data["repeticiones"]["valor2"],
-            "porcentaje": data["porcentaje"],
-            "densidad": data["densidad"],
-            "a_y_sed": data["a_y_sed"],
-            "grabs_a": data["grabs_a"],
-            "peso_a": data["peso_a"],
-            "volumen_a": data["volumen_a"],
-            "grabs_b": data["grabs_b"],
-            "peso_b": data["peso_b"],
-            "volumen_b": data["volumen"]
-        }
+    global last_message_time
+    current_time = time.time()
+    
+    # Verificar si han pasado al menos 60 segundos desde el último mensaje procesado
+    if current_time - last_message_time >= 60:
+        last_message_time = current_time  # Actualiza el tiempo del último mensaje procesado
 
-        # Insertar los datos en Supabase
-        supabase.table("lecturas").insert(data_mapped).execute()
-        print("Datos insertados en Supabase:", data_mapped)
-    except Exception as e:
-        print("Error al insertar datos en Supabase:", e)
+        try:
+            data = json.loads(msg.payload.decode("utf-8"))
+            data_mapped = {
+                "flujo": data["flujo"],
+                "frecuencia1": data["frecuencia"]["valor1"],
+                "frecuencia2": data["frecuencia"]["valor2"],
+                "lote1": data["lote"]["valor1"],
+                "lote2": data["lote"]["valor2"],
+                "repeticion1": data["repeticiones"]["valor1"],
+                "repeticion2": data["repeticiones"]["valor2"],
+                "porcentaje": data["porcentaje"],
+                "densidad": data["densidad"],
+                "a_y_sed": data["a_y_sed"],
+                "grabs_a": data["grabs_a"],
+                "peso_a": data["peso_a"],
+                "volumen_a": data["volumen_a"],
+                "grabs_b": data["grabs_b"],
+                "peso_b": data["peso_b"],
+                "volumen_b": data["volumen"]
+            }
+
+            # Insertar los datos en Supabase
+            supabase.table("lecturas").insert(data_mapped).execute()
+            print("Datos insertados en Supabase:", data_mapped)
+        except Exception as e:
+            print("Error al insertar datos en Supabase:", e)
 
 # Configuración del cliente MQTT
 mqtt_client = mqtt.Client()
