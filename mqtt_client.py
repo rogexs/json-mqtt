@@ -1,4 +1,3 @@
-# mqtt_client.py
 import time
 import json
 from supabase import create_client
@@ -16,30 +15,61 @@ last_message_time = 0
 
 # Funciones MQTT
 def on_connect(client, userdata, flags, rc):
-    print("Conectado a MQTT:", rc)
-    client.subscribe("test/topic")
+    print(f"Conectado a MQTT con código de resultado: {rc}")
+    if rc == 0:
+        print("Conexión exitosa, suscribiendo al tema...")
+        client.subscribe("test/topic")
+    else:
+        print(f"Error en conexión MQTT: {rc}")
 
 def on_message(client, userdata, msg):
     global last_message_time
+    print(f"Mensaje recibido en el tema {msg.topic}: {msg.payload.decode('utf-8')}")
+    
     current_time = time.time()
     
+    # Comprobar si han pasado 60 segundos desde el último mensaje
     if current_time - last_message_time >= 60:
         last_message_time = current_time
         try:
+            # Procesar y mapear los datos
             data = json.loads(msg.payload.decode("utf-8"))
             data_mapped = {
                 "flujo": data["flujo"],
-                # Mapeo de datos...
+                # Mapear otros datos necesarios...
             }
-            supabase.table("lecturas").insert(data_mapped).execute()
-            print("Datos insertados:", data_mapped)
+            # Insertar en Supabase
+            response = supabase.table("lecturas").insert(data_mapped).execute()
+            if response.status_code == 201:
+                print(f"Datos insertados exitosamente: {data_mapped}")
+            else:
+                print(f"Error al insertar datos en Supabase: {response.status_code}")
         except Exception as e:
-            print("Error en Supabase:", e)
+            print(f"Error procesando el mensaje o insertando en Supabase: {e}")
+    else:
+        print("Mensaje ignorado, menos de 60 segundos desde el último mensaje.")
 
+# Configuración del cliente MQTT
 mqtt_client = mqtt.Client()
+
+# Asignar las funciones de callback
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
+
+# Establecer TLS con el certificado
 mqtt_client.tls_set(ca_certs="certs/isrgrootx1.pem")
+
+# Configurar credenciales y conexión
 mqtt_client.username_pw_set("SuperRoot-99", "SuperRoot-99")
 mqtt_client.connect("fee7a60180ef4e41a8186ff373e7ff32.s1.eu.hivemq.cloud", 8883)
+
+# Iniciar el bucle del cliente MQTT
 mqtt_client.loop_start()
+
+# Mantener el proceso en ejecución para que el cliente MQTT siga funcionando
+try:
+    while True:
+        time.sleep(1)  # Esperar mientras se reciben los mensajes
+except KeyboardInterrupt:
+    print("Cliente MQTT detenido.")
+    mqtt_client.loop_stop()
