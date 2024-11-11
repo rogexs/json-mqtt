@@ -36,14 +36,30 @@ def on_message(client, userdata, msg):
             data = json.loads(msg.payload.decode("utf-8"))
             data_mapped = {
                 "flujo": data["flujo"],
-                # Mapear otros datos necesarios...
+                "frecuencia1": data.get("frecuencia", {}).get("valor1", None),
+                "frecuencia2": data.get("frecuencia", {}).get("valor2", None),
+                "lote1": data.get("lote", {}).get("valor1", None),
+                "lote2": data.get("lote", {}).get("valor2", None),
+                "repeticion1": data.get("repeticiones", {}).get("valor1", None),
+                "repeticion2": data.get("repeticiones", {}).get("valor2", None),
+                "porcentaje": data.get("porcentaje", None),
+                "densidad": data.get("densidad", None),
+                "a_y_sed": data.get("a_y_sed", None),
+                "grabs_a": data.get("grabs_a", None),
+                "peso_a": data.get("peso_a", None),
+                "volumen_a": data.get("volumen_a", None),
+                "grabs_b": data.get("grabs_b", None),
+                "peso_b": data.get("peso_b", None),
+                "volumen_b": data.get("volumen", None)
             }
             # Insertar en Supabase
             response = supabase.table("lecturas").insert(data_mapped).execute()
-            if response.status_code == 201:
-                print(f"Datos insertados exitosamente: {data_mapped}")
+
+            # Verificar si hubo un error en la respuesta
+            if response.error:
+                print(f"Error al insertar datos en Supabase: {response.error}")
             else:
-                print(f"Error al insertar datos en Supabase: {response.status_code}")
+                print(f"Datos insertados exitosamente: {response.data}")
         except Exception as e:
             print(f"Error procesando el mensaje o insertando en Supabase: {e}")
     else:
