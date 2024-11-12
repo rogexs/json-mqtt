@@ -1,22 +1,21 @@
-// lecturas.js
+let limite = 50; // Número de registros a cargar
+let offset = 0; // Desplazamiento inicial
+const apiUrl = 'https://json-mqtt.onrender.com/lecturas'; // URL de la API
 
-// Función para obtener los datos de la API y llenar la tabla
+// Función para obtener datos de la API con paginación
 async function fetchLecturas() {
     try {
-        const response = await fetch('https://json-mqtt.onrender.com/lecturas');
+        const response = await fetch(`${apiUrl}?limite=${limite}&offset=${offset}`);
         if (!response.ok) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
 
         const data = await response.json();
         const tableBody = document.getElementById('lecturas-table');
-        tableBody.innerHTML = ''; // Limpia el contenido existente
 
         if (data.length) {
             data.forEach(reading => {
                 const row = document.createElement('tr');
-
-                // Especificar el orden de los datos en la fila
                 row.innerHTML = `
                     <td>${reading.id || '-'}</td>
                     <td>${reading.flujo || '-'}</td>
@@ -36,11 +35,13 @@ async function fetchLecturas() {
                     <td>${reading.peso_b || '-'}</td>
                     <td>${reading.volumen_b || '-'}</td>
                 `;
-
                 tableBody.appendChild(row);
             });
+
+            offset += limite; // Incrementar el desplazamiento
         } else {
-            mostrarError("No se encontraron datos en la base de datos.");
+            mostrarError("No hay más datos para cargar.");
+            document.getElementById('cargar-mas').disabled = true; // Deshabilitar el botón
         }
     } catch (error) {
         console.error('Error al obtener los datos:', error);
@@ -58,6 +59,8 @@ function mostrarError(mensaje) {
     }, 5000); // Desaparece en 5 segundos
 }
 
-// Llama a fetchLecturas al cargar la página y actualiza la tabla cada 10 segundos
+// Evento para cargar más registros
+document.getElementById('cargar-mas').addEventListener('click', fetchLecturas);
+
+// Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', fetchLecturas);
-setInterval(fetchLecturas, 10000);

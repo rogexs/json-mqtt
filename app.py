@@ -1,5 +1,5 @@
 import subprocess
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from supabase import create_client, Client
 
@@ -30,21 +30,12 @@ def registros():
 @app.route('/lecturas', methods=['GET'])
 def get_lecturas():
     try:
-        all_readings = []
-        offset = 0
-        limit = 1000
+        limite = int(request.args.get('limite', 50))  # Límite predeterminado
+        offset = int(request.args.get('offset', 0))  # Desplazamiento inicial
 
-        while True:
-            response = supabase.table("lecturas").select("*").range(offset, offset + limit - 1).execute()
-            if response.data:
-                all_readings.extend(response.data)
-                if len(response.data) < limit:
-                    break
-                offset += limit
-            else:
-                break
-
-        return jsonify(all_readings), 200
+        # Consulta paginada a la tabla 'lecturas'
+        response = supabase.table("lecturas").select("*").range(offset, offset + limite - 1).execute()
+        return jsonify(response.data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
