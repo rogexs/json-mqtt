@@ -33,7 +33,8 @@ def get_lecturas():
         offset = int(request.args.get('offset', 0))
         limit = int(request.args.get('limit', 20))
 
-        response = supabase.table("lecturas").select("*").range(offset, offset + limit - 1).execute()
+        # Consulta a Supabase con rango y orden explícito
+        response = supabase.table("lecturas").select("*").order("id", asc=True).range(offset, offset + limit - 1).execute()
 
         if response.data:
             return jsonify(response.data), 200
