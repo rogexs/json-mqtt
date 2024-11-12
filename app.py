@@ -30,12 +30,15 @@ def registros():
 @app.route('/lecturas', methods=['GET'])
 def get_lecturas():
     try:
-        limite = int(request.args.get('limite', 50))  # Límite predeterminado
-        offset = int(request.args.get('offset', 0))  # Desplazamiento inicial
+        offset = int(request.args.get('offset', 0))
+        limit = int(request.args.get('limit', 20))
 
-        # Consulta paginada a la tabla 'lecturas'
-        response = supabase.table("lecturas").select("*").range(offset, offset + limite - 1).execute()
-        return jsonify(response.data), 200
+        response = supabase.table("lecturas").select("*").range(offset, offset + limit - 1).execute()
+
+        if response.data:
+            return jsonify(response.data), 200
+        else:
+            return jsonify([]), 200  # Devuelve una lista vacía si no hay más datos
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
